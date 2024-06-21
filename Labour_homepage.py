@@ -52,13 +52,32 @@ class Labour:
     # method to download report
     def download_monthly_report(self):
         try:
+            # call to documents method
             self.documents()
             sleep(7)
-            self.driver.find_element(By.LINK_TEXT, "Download(139.61 KB)").click()
-            # using switch to alert for click on ok of dialog box appear
+            # collect window id of home page
+            home_handle = self.driver.window_handles
+            # xpath to click on download button
+            self.driver.find_element(By.XPATH, value="/html/body/section[3]/div/div/div[3]/div[2]/div["
+                                                     "1]/div/div/div/div/div/div/div/div/div/div[2]/div["
+                                                     "2]/table/tbody/tr[2]/td[2]/a").click()
+            # to handle dialog box
             self.driver.switch_to.alert.accept()
-            sleep(3)
-            # self.driver.close()
+            sleep(5)
+            # collect all the window handles
+            all_handle = self.driver.window_handles
+            for windows in all_handle:
+                # switch window to new tab
+                if windows != home_handle:
+                    self.driver.switch_to.window(windows)
+                    # get url of new tab
+                    pdf_url = self.driver.current_url  # Get Current URL
+                    response = requests.get(pdf_url)
+                    file_name = 'newfile.pdf'
+                    # store content in new file
+                    with open(file_name, 'wb') as f:
+                        f.write(response.content)
+
             return True
         except:
             print("error")
@@ -95,3 +114,9 @@ class Labour:
             return True
         except:
             print("error")
+
+
+if __name__ == "__main__":
+    url = "https://labour.gov.in/"
+    labour_obj1 = Labour(url)
+    labour_obj1.download_monthly_report()
